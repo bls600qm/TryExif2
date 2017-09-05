@@ -5,7 +5,6 @@ package jp.rika.sumitomo.tryexif2;
     import android.graphics.BitmapFactory;
     import android.media.ExifInterface;
     import android.os.Bundle;
-    import android.os.Environment;
     import android.widget.ImageView;
     import android.widget.TextView;
     import android.app.Activity;
@@ -27,10 +26,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView sizeText = (TextView) findViewById(R.id.text1);
-        TextView dateText = (TextView) findViewById(R.id.text2);
-        TextView latlongText = (TextView) findViewById(R.id.text3);
-        ImageView thumbnailView = (ImageView) findViewById(R.id.image);
+        ImageView imageView = (ImageView) findViewById(R.id.image);
 
         Drawable drawable = getResources().getDrawable(R.drawable.sample);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sample);
@@ -40,16 +36,20 @@ public class MainActivity extends Activity {
         hasExternalStoragePrivateFile();
 
 // 以下のfilenameを自分の画像のパスに変更してください。
-        String filename = "/sdcard/DSC_3509.JPG";
+        String filename ="/storage/emulated/0/Android/data/jp.rika.sumitomo.tryexif2/files/DemoFile.jpg";
+        //String filename = Environment.getExternalStorageDirectory().getPath();
+
         try {
             exif = new ExifInterface(filename);
-            //ShowExif(exif);
-            showExif();
-
-
+            Log.d("filename",filename);
+            if(exif != null){
+                showExif();
+            }else{
+                Log.d("error","exif is null");
+            }
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+
             e.printStackTrace();
             Toast.makeText(this, "Error!",
                     Toast.LENGTH_LONG).show();
@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     void createExternalStoragePrivateFile() {
         // Create a path where we will place our private file on external
         // storage.
-        File file = new File(getExternalFilesDir(null), "sample.jpg");
+        File file = new File(getExternalFilesDir(null), "DemoFile.jpg");
 
         try {
             // Very simple code to copy a picture from the application's
@@ -75,17 +75,19 @@ public class MainActivity extends Activity {
             os.write(data);
             is.close();
             os.close();
+            Log.d("fileplece",file.toString());
         } catch (IOException e) {
             // Unable to create file, likely because external storage is
             // not currently mounted.
             Log.w("ExternalStorage", "Error writing " + file, e);
+            e.printStackTrace();
         }
     }
 
     void deleteExternalStoragePrivateFile() {
         // Get path for the file on external storage.  If external
         // storage is not currently mounted this will fail.
-        File file = new File(getExternalFilesDir(null), "sample.jpg");
+        File file = new File(getExternalFilesDir(null), "DemoFile.jpg");
         if (file != null) {
             file.delete();
         }
@@ -94,27 +96,25 @@ public class MainActivity extends Activity {
     boolean hasExternalStoragePrivateFile() {
         // Get path for the file on external storage.  If external
         // storage is not currently mounted this will fail.
-        File file = new File(getExternalFilesDir(null), "sample.jpg");
+        File file = new File(getExternalFilesDir(null), "DemoFile.jpg");
         if (file != null) {
             return file.exists();
         }
         return false;
     }
+
     void showExif(){
         if(exif != null) {
             // get latitude and longitude
             float[] latlong = new float[2];
             exif.getLatLong(latlong);
+            Log.d("latong", String.valueOf(latlong));
+
+            double altitude = exif.getAttributeDouble(ExifInterface.TAG_GPS_ALTITUDE, 0); // since API Level 9
+            double latitude = exif.getAttributeDouble(ExifInterface.TAG_GPS_LATITUDE, 0);
+            Log.d("exif", "altitude : " + altitude);
+            Log.d("exif", "latitude : " + latitude);
+
         }
-        double altitude = exif.getAttributeDouble (ExifInterface.TAG_GPS_ALTITUDE, 0); // since API Level 9
-        double altitudeRef = exif.getAttributeDouble (ExifInterface.TAG_GPS_ALTITUDE_REF, 0);
-        String latitude = exif.getAttribute (ExifInterface.TAG_GPS_LATITUDE);
-        String latitudeRef = exif.getAttribute (ExifInterface.TAG_GPS_LATITUDE_REF);
-
-
-        Log.d("exif", "altitude : " + altitude);
-        Log.d("exif", "altitudeRef : " + altitudeRef);
-        Log.d("exif", "latitude : " + latitude);
-        Log.d("exif", "latitudeRef : " + latitudeRef);
     }
 }
