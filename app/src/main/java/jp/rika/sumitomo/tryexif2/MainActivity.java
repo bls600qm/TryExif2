@@ -15,6 +15,7 @@ package jp.rika.sumitomo.tryexif2;
     import java.io.InputStream;
     import java.io.FileOutputStream;
     import android.widget.Toast;
+    import android.os.Environment;
 
 
 public class MainActivity extends Activity {
@@ -36,14 +37,19 @@ public class MainActivity extends Activity {
         hasExternalStoragePrivateFile();
 
 // 以下のfilenameを自分の画像のパスに変更してください。
-        String filename ="/storage/emulated/0/Android/data/jp.rika.sumitomo.tryexif2/files/DemoFile.jpg";
-        //String filename = Environment.getExternalStorageDirectory().getPath();
+        //String filename ="/storage/emulated/0/Android/data/jp.rika.sumitomo.tryexif2/files/DemoFile.jpg";
+        String filename = Environment.getExternalStorageDirectory().getPath();
 
         try {
             exif = new ExifInterface(filename);
             Log.d("filename",filename);
             if(exif != null){
-                showExif();
+                //showExif();
+                String altitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
+                String latitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
+
+                Log.d("exif", "altitude : " + altitude);
+                Log.d("exif", "latitude : " + latitude);
             }else{
                 Log.d("error","exif is null");
             }
@@ -76,6 +82,7 @@ public class MainActivity extends Activity {
             is.close();
             os.close();
             Log.d("fileplece",file.toString());
+
         } catch (IOException e) {
             // Unable to create file, likely because external storage is
             // not currently mounted.
@@ -108,7 +115,10 @@ public class MainActivity extends Activity {
             // get latitude and longitude
             float[] latlong = new float[2];
             exif.getLatLong(latlong);
-            Log.d("latong", String.valueOf(latlong));
+
+            String[] exifStr = new String[9];
+
+            Log.d("latong", String.valueOf(latlong));//latLong[0] には緯度、latLong[1]には経度が入る
 
             double altitude = exif.getAttributeDouble(ExifInterface.TAG_GPS_ALTITUDE, 0); // since API Level 9
             double latitude = exif.getAttributeDouble(ExifInterface.TAG_GPS_LATITUDE, 0);
